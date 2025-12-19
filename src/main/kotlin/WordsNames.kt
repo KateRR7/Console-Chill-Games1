@@ -21,6 +21,7 @@ class WordGame(
 
     fun start() {
         println("=== Игра: Слова / Имена ===")
+        println("Обращаю внимание, что имена должны быть написаны с заглавной буквы, а слова с маленькой.")
 
         print("Введите ваше имя: ")
         val human = readLine()?.trim().takeUnless { it.isNullOrBlank() } ?: "Игрок"
@@ -60,6 +61,7 @@ class WordGame(
         }
 
         println("Игра окончена.")
+        println("Результат: ${round - 1}")
     }
 
 
@@ -74,6 +76,7 @@ class WordGame(
         }
 
         val word = normalize(input)
+
         if (!isValid(word, category)) {
             println("Ошибка. Компьютер победил.")
             return false
@@ -111,11 +114,19 @@ class WordGame(
         if (word in used) return false
         if (lastChar != null && word.first() != lastChar) return false
 
+        val dictionary = getDictionary(category)
+
+        if (word !in dictionary) {
+            println("Такое слово не существует.")
+            return false
+        }
+
         return when (category) {
             Category.WORD -> true
             Category.NAME -> !word.contains(' ')
         }
     }
+
 
 
     private fun getDictionary(category: Category): List<String> =
