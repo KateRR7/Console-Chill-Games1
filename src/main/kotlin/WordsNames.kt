@@ -117,7 +117,7 @@ class WordGame(
         val dictionary = getDictionary(category)
 
         if (word !in dictionary) {
-            println("Такое слово не существует.")
+            println("Такого слова не существует.")
             return false
         }
 
