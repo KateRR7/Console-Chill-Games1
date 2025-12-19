@@ -16,13 +16,58 @@ object BlockTypes {
     const val PLAYER_COLOR = "\u001B[36m"
     const val RESET_COLOR = "\u001B[0m"
 }
+object Difficulty {
+    const val EASY = 1
+    const val MEDIUM = 2
+    const val HARD = 3
+    const val EXTREME = 4
 
+    fun getSpeedMultiplier(level: Int): Double {
+        return when(level) {
+            EASY -> 0.7
+            MEDIUM -> 1.0
+            HARD -> 1.3
+            EXTREME -> 1.6
+            else -> 1.0
+        }
+    }
+
+    fun getDangerousChance(level: Int): Double {
+        return when(level) {
+            EASY -> 0.4
+            MEDIUM -> 0.6
+            HARD -> 0.75
+            EXTREME -> 0.85
+            else -> 0.6
+        }
+    }
+    fun getSpawnRate(level: Int): Int { // ДОБАВЛЕНО: частота появления блоков
+        return when (level) {
+            EASY -> 60  // Медленное появление
+            MEDIUM -> 45 // Среднее
+            HARD -> 30   // Частое
+            EXTREME -> 20 // Очень частое
+            else -> 45
+        }
+    }
+
+    fun getName(level: Int): String {
+        return when(level) {
+            EASY -> "ЛЕГКИЙ"
+            MEDIUM -> "СРЕДНИЙ"
+            HARD -> "СЛОЖНЫЙ"
+            EXTREME -> "ЭКСТРЕМАЛЬНЫЙ"
+            else -> "СРЕДНИЙ"
+        }
+    }
+}
 
 data class GameState(
     var score: Int = 0,
     var lives: Int = 3,
     var isGameOver: Boolean = false,
-    var level: Int = 1
+    var level: Int = 1,
+    var difficulty: Int = Difficulty.MEDIUM
 )
 
 
@@ -56,8 +101,10 @@ class DropZoneGame {
 
     private val BASE_GAME_SPEED = 250L
     private val BASE_BLOCK_SPEED = 0.3
-    private val SPAWN_INTERVAL = 45
+    private var SPAWN_INTERVAL = 45
 
+    private var usefulBlocks = 0
+    private var dangerousBlocks = 0
 
     private fun clearField() {
         for (y in 0 until HEIGHT) {
@@ -122,7 +169,7 @@ class DropZoneGame {
         val x = Random.nextInt(0, WIDTH)
         val isDangerous = Random.nextDouble() < 0.7
 
-        val speed = BASE_BLOCK_SPEED + (state.level * 0.1)
+        val speed = BASE_BLOCK_SPEED +  Difficulty.getSpeedMultiplier(state.difficulty) + (state.level * 0.1)
 
         fallingObjects.add(GameObject(x, 0.0, isDangerous, speed))
     }
@@ -137,12 +184,13 @@ class DropZoneGame {
             if (obj.y >= HEIGHT - 1 && obj.x in (playerX - 1)..(playerX + 1)) {
                 if (obj.isDangerous) {
                     state.lives--
+                    dangerousBlocks++
                     if (state.lives <= 0) {
                         state.isGameOver = true
                     }
                 } else {
                     state.score += 10
-
+                    usefulBlocks++
                     state.level = (state.score / 50) + 1
                 }
                 objectsToRemove.add(obj)
@@ -160,7 +208,7 @@ class DropZoneGame {
         when (input.uppercaseChar()) {
             'A' -> if (playerX > 1) playerX--
             'D' -> if (playerX < WIDTH - 2) playerX++
-            'Q' -> exitProcess(0)
+            'Q' -> state.isGameOver = true
         }
     }
 
@@ -175,16 +223,60 @@ class DropZoneGame {
             null
         }
     }
-    private fun showResults() {
-        println("Score: ${state.score} | Lives: ${state.lives} | Level: ${state.level}")
-        println("Controls: A - left, D - right, Q - quit")
-        println("${BlockTypes.USEFUL_COLOR}${BlockTypes.USEFUL_SYMBOL}${BlockTypes.RESET_COLOR} - +10 points | ${BlockTypes.DANGEROUS_COLOR}${BlockTypes.DANGEROUS_SYMBOL}${BlockTypes.RESET_COLOR} - -1 life")
+    private fun selectDifficulty() {
+        println("\n=== ВЫБЕРИТЕ УРОВЕНЬ СЛОЖНОСТИ ===")
+        println("1. ЛЕГКИЙ (скорость x0.7, 40% опасных)")
+        println("2. СРЕДНИЙ (скорость x1.0, 60% опасных) ← по умолчанию")
+        println("3. СЛОЖНЫЙ (скорость x1.3, 75% опасных)")
+        println("4. ЭКСТРЕМАЛЬНЫЙ (скорость x1.6, 85% опасных)")
+        print("\nВаш выбор (1-4, Enter для среднего): ")
+
+        val input = readLine()
+        state.difficulty = when (input?.toIntOrNull()) {
+            1 -> Difficulty.EASY
+            2 -> Difficulty.MEDIUM
+            3 -> Difficulty.HARD
+            4 -> Difficulty.EXTREME
+            else -> Difficulty.MEDIUM
+        }
+        SPAWN_INTERVAL = Difficulty.getSpawnRate(state.difficulty)
+    }
+
+    // Улучшаем showResults
+    private fun showFinalResults() {
+        print("\u001B[H\u001B[2J")
+        println("╔══════════════════════════════════╗")
+        println("║        РЕЗУЛЬТАТЫ ИГРЫ          ║")
+        println("╠══════════════════════════════════╣")
+        println("║                                  ║")
+        println("║  Сложность: ${Difficulty.getName(state.difficulty).padEnd(20)}║")
+        println("║  Финальный счет: ${state.score.toString().padEnd(15)}║")
+        println("║  Достигнутый уровень: ${state.level.toString().padEnd(10)}║")
+        println("║                                  ║")
+        println("║  Статистика:                     ║")
+        println("║  • Полезных блоков: ${usefulBlocks.toString().padEnd(12)}║")
+        println("║  • Опасных блоков: ${dangerousBlocks.toString().padEnd(13)}║")
+        println("║  • Всего блоков: ${(usefulBlocks + dangerousBlocks).toString().padEnd(15)}║")
+        println("║                                  ║")
+        println("║                                  ║")
+        println("╠══════════════════════════════════╣")
+        println("║                                  ║")
+        println("║  Нажмите:                        ║")
+        println("║  [R] - Играть снова              ║")
+        println("║  [Q] - Выйти                     ║")
+        println("║                                  ║")
+        println("╚══════════════════════════════════╝")
     }
 
     fun startGame() {
         println("Добро пожаловать в игру Drop Zone")
         println("Уворачивайтесь от красных X (X) и собирайте зеленые O (O)")
         println("Ваша фигурка: ${BlockTypes.PLAYER_COLOR}/A\\${BlockTypes.RESET_COLOR}")
+        println("🎮 Управление: ")
+        println("[A] ← двигаться влево")
+        println("[D] → двигаться вправо")
+        println("[Q] выйти из игры")
+        selectDifficulty()
         println("Нажмите Enter чтобы начать...")
         readLine()
 
@@ -209,14 +301,28 @@ class DropZoneGame {
             Thread.sleep(BASE_GAME_SPEED)
         }
         print("\u001B[H\u001B[2J")
-        showResults()
+        showFinalResults()
         while (true) {
             val input = readInput()
-            if (input != null && input.uppercaseChar() == 'Q') {
-                println("Score: ${state.score} | Lives: ${state.lives} | Level: ${state.level}")
-                println("Controls: A - left, D - right, Q - quit")
-                println("${BlockTypes.USEFUL_COLOR}${BlockTypes.USEFUL_SYMBOL}${BlockTypes.RESET_COLOR} - +10 points | ${BlockTypes.DANGEROUS_COLOR}${BlockTypes.DANGEROUS_SYMBOL}${BlockTypes.RESET_COLOR} - -1 life")
-                exitProcess(0)
+            when (input?.uppercaseChar()) {
+                'R' -> {
+                    state.score = 0
+                    state.lives = 3
+                    state.isGameOver = false
+                    state.level = 1
+                    playerX = WIDTH / 2
+                    fallingObjects.clear()
+                    gameTick = 0
+                    usefulBlocks = 0
+                    dangerousBlocks = 0
+
+                    startGame()
+                    return
+                }
+                'Q' -> {
+                    println("\nСпасибо за игру!")
+                    exitProcess(0)
+                }
             }
             Thread.sleep(10)
         }

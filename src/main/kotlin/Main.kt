@@ -2,6 +2,8 @@ package main
 
 import WordGame
 import WordlyGame
+import mainMenu
+import welcomeMessage
 
 fun cyan(text: String) = "\u001B[36m$text\u001B[0m"
 fun purple(text: String) = "\u001B[35m$text\u001B[0m"
@@ -16,7 +18,8 @@ fun main() {
         println(purple("Если хочешь поиграть в DropZoneGame - введи 1."))
         println(purple("Если хочешь поиграть в WordlyGame - введи 2."))
         println(purple("Если хочешь поиграть в WordsNames - введи 3."))
-        println(purple("Если хочешь выйти из приложения - введи 4."))
+        println(purple("Если хочешь поиграть в Snake - введи 4."))
+        println(purple("Если хочешь выйти из приложения - введи 5."))
         println(purple("Выбирай игру!"))
         val input = readln().toInt()
         if (input == 1){
@@ -36,8 +39,12 @@ fun main() {
             val game = WordGame(words, names)
             game.start()
         }
-        if (input == 4) {
+        if (input == 5) {
             break
+        }
+        if (input == 4) {
+            welcomeMessage()
+            mainMenu()
         }
     }
 }
