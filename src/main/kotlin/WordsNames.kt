@@ -114,19 +114,11 @@ class WordGame(
         if (word in used) return false
         if (lastChar != null && word.first() != lastChar) return false
 
-        val dictionary = getDictionary(category)
-
-        if (word !in dictionary) {
-            println("Такого слова не существует.")
-            return false
-        }
-
         return when (category) {
             Category.WORD -> true
             Category.NAME -> !word.contains(' ')
         }
     }
-
 
 
     private fun getDictionary(category: Category): List<String> =
