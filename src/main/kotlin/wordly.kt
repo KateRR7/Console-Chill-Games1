@@ -4,11 +4,11 @@ class WordlyGame {
     private var attempt = 6
     private var success = false
     private lateinit var word: String
-    private val russianWords = File("Файл с словами.txt").readLines()
+    private val russianWords = File("C:\\Users\\Admin\\Console-Chill-Games1\\src\\main\\resources\\Файл с словами.txt").readLines()
 
     fun start() {
         try {
-            val file = File("Файл с словами.txt").readLines().map { it.trim() }
+            val file = File("C:\\Users\\Admin\\Console-Chill-Games1\\src\\main\\resources\\Файл с словами.txt").readLines().map { it.trim() }
             word = file.random()
             while (word.length != 5) {
                 word = file.random()
@@ -75,13 +75,13 @@ class WordlyGame {
             success = true
             println("Поздравляем, вы угадали слово \"$word\"!")
 
-            val record: String = File("input.txt").readText()
+            val record: String = File("C:\\Users\\Admin\\Console-Chill-Games1\\src\\main\\resources\\input.txt").readText()
             var record1: Int = record.toInt()
             if (6 - attempt < record1) {
                 println("Вы установили новый личный рекорд! " +
                         "За ${6 - attempt} попыток вы смогли догадаться до данного слова=)")
                 record1 = 6 - attempt
-                File("input.txt").writeText(record1.toString())
+                File("C:\\Users\\Admin\\Console-Chill-Games1\\src\\main\\resources\\input.txt").writeText(record1.toString())
             } else {
                 println("Ваш рекорд по этой игре: $record")
             }
@@ -120,8 +120,4 @@ class WordlyGame {
 }
 
 
-fun main() {
-    System.setOut(java.io.PrintStream(System.out, true, "UTF-8"))
-    WordlyGame().start()
-}
 

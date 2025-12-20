@@ -28,7 +28,8 @@ fun main() {
             game.startGame()
         }
         if (input == 2) {
-            WordlyGame().start()
+            val game = WordlyGame()
+            game.start()
         }
         if (input == 3){
 
