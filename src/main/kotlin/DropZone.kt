@@ -167,7 +167,7 @@ class DropZoneGame {
 
     private fun spawnFallingObject() {
         val x = Random.nextInt(0, WIDTH)
-        val isDangerous = Random.nextDouble() < 0.7
+        val isDangerous = Random.nextDouble() < Difficulty.getDangerousChance(state.difficulty)
 
         val speed = BASE_BLOCK_SPEED +  Difficulty.getSpeedMultiplier(state.difficulty) + (state.level * 0.1)
 
