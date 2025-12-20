@@ -15,6 +15,7 @@ fun main() {
         println(cyan("Советую сделать окно консоли побольше."))
         println("                                                  ")
         Thread.sleep(7000L)
+
         println(purple("Если хочешь поиграть в DropZoneGame - введи 1."))
         println(purple("Если хочешь поиграть в WordlyGame - введи 2."))
         println(purple("Если хочешь поиграть в WordsNames - введи 3."))
@@ -30,11 +31,11 @@ fun main() {
             WordlyGame().start()
         }
         if (input == 3){
-            print("Путь к файлу слов: ")
-            val words = readLine()!!.trim()
 
-            print("Путь к файлу имён: ")
-            val names = readLine()!!.trim()
+            val wordspath = "C:\\Users\\timur\\Documents\\Console-Chill-Games1\\src\\main\\resources\\Файл с словами.txt"
+            val words = wordspath.trim()
+            val namespath = "C:\\Users\\timur\\Documents\\Console-Chill-Games1\\src\\main\\resources\\Файл с именами.txt"
+            val names = namespath.trim()
 
             val game = WordGame(words, names)
             game.start()
@@ -46,5 +47,11 @@ fun main() {
             welcomeMessage()
             mainMenu()
         }
+
     }
 }
+
+
+
+
+
